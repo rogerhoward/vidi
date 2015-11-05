@@ -1,76 +1,57 @@
 #!/usr/bin/env python
 import requests, os, sys
-command_list = ['add', 'search']
 url_base = ''
 
-
-def add(path, id):
-    url = 'http://localhost:8000/index/images/%s' % (id)
-    # files = {'file': open(path, 'rb')}
-    # r = requests.put(url, files=files)
-    # return r.json()
-
-    with open(path) as fo:
-        body_data = fo.read()
-        r = requests.put(url, data=body_data, headers={'content-type':'image/jpeg'})
-
-    return r.json()
+from config import *
 
 
-def find(path):
-    url = 'http://localhost:8000/index/searcher'
+class Server(object):
+    """A subclass of GenericDynamicImage which implements IIIF 2.0-compliant
+    behavior:
 
-    with open(path) as fo:
-        body_data = fo.read()
-        r = requests.post(url, data=body_data, headers={'content-type':'image/jpeg'})
+    Attributes:
+        image: a Pillow Image object.
+        info: a dictionary providing image metadata
+    """
 
-    return r.json()
+    commands = ['add', 'search']
 
-if __name__ == '__main__':
-    import optparse
-    parser = optparse.OptionParser()
+    def __init__(self, host='locahost', port=8001 ):
+        """Return a IIIFImage object minimally initiated by *identifier*
+        with additional parameters required to generate dynamic derivatives."""
 
-    parser.add_option('-i', '--input', dest='path', help='read image from FILE', metavar="FILE")
-    parser.add_option('-d', '--id', dest='id', help='index id', type=int)
-    parser.add_option('-c', '--command', dest='command', help='command mode')
-    parser.add_option('-p', '--port', dest='port', help='port number', type=int)
-    parser.add_option('-o', '--host', dest='host', help='hostname')
-
-    options, args = parser.parse_args()
-
-    if options.path is None:
-        print 'sorry, you must provide the -i option at minimum'
-        exit
-    elif os.path.exists(options.path) is False:
-        print 'sorry, the path provided does not exist'
-        exit
-    elif os.path.isfile(options.path) is False:
-        print 'sorry, the path provided is not a file'
-        exit
+        self.host = host
+        self.port = port
+        self.url = 'http://%s:%s' % (self.host, self.port)
 
 
-    if options.command is None:
-        options.command = 'search'
-    elif options.command not in command_list:
-        print 'sorry, %s is not a supported command.' % (options.command)
-        print 'supported commands are: %s' % (', '.join(command_list))
-        exit
+    def __unicode__(self):
+        """Return image info dictionary based on identifier."""
+        return self.url
 
-    if options.port is None:
-        options.port = 8000
 
-    if options.host is None:
-        options.host = 'localhost'
+    def ping(self):
+        url = '%s/' % (self.url)
 
-    url_base = 'http://%s:%s' % (options.host, options.port)
+        r = requests.post(url, json={'type':'PING'})
 
-    if options.command == 'search':
-        the_result = find(options.path)
-    elif options.command == 'add':
-        if options.id is None:
-            print 'Sorry, the add command requires the -d ID parameter'
-            sys.exit(0)
-        else:
-            the_result = add(options.path, options.id)
+        return r.json()
 
-    # print the_result
+    def add(self, path, id):
+        url = '%s/index/images/%s' % (self.url, id)
+
+        with open(path) as this_file:
+            body_data = this_file.read()
+            r = requests.put(url, data=body_data, headers={'content-type':'image/jpeg'})
+
+        return r.json()
+
+
+    def find(self, path):
+        url = '%s/index/searcher' % (self.url)
+
+        with open(path) as this_file:
+            body_data = this_file.read()
+            r = requests.post(url, data=body_data, headers={'content-type':'image/jpeg'})
+
+        return r.json()
