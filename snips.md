@@ -17,6 +17,7 @@ snips are useful code snippets, command line examples, etc
 ```./cli.py -c clear```
 
 ### To add an image to the index
+*FILE is a path to a JPEG*
 ```./cli.py -c add -i FILE -d ID```
 
 ### To add all images within a directory to the index
