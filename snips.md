@@ -14,7 +14,9 @@ snips are useful code snippets, command line examples, etc
 ```./cli.py -c save -i save.dat```
 
 ### To clear the current index
-```./cli.py -c clear```
+```Shell
+./cli.py -c clear
+```
 
 ### To add an image to the index
 *FILE is a path to a JPEG*
