@@ -12,7 +12,7 @@ class Server(object):
         image: a Pillow Image object.
         info: a dictionary providing image metadata
     """
-    
+
     commands = ['add','search','ping', 'save', 'load', 'clear', 'bulk']
 
 
@@ -32,8 +32,8 @@ class Server(object):
         url = '%s/index/images/%s' % (self.url, id)
         print(url)
         with open(path, 'rb') as this_file:
-            body_data = this_file.read()
-        r = requests.put(url, data=body_data, headers={'content-type': 'image/jpeg'})
+            # body_data = this_file.read()
+            r = requests.put(url, data=this_file, headers={'content-type': 'image/jpeg'})
         return r.json()
 
     def clear(self):
