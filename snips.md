@@ -19,7 +19,7 @@ snips are useful code snippets, command line examples, etc
 ### To add an image to the index
 *FILE is a path to a JPEG*
 
-```bash
+```Shell
 ./cli.py -c add -i FILE -d ID
 ```
 
