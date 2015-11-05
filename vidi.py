@@ -15,7 +15,7 @@ class Server(object):
 
     commands = ['add', 'search']
 
-    def __init__(self, host='locahost', port=8001 ):
+    def __init__(self, host='locahost', port=8001):
         """Return a Server object."""
         self.host = host
         self.port = port
@@ -24,7 +24,7 @@ class Server(object):
     def ping(self):
         url = '%s/' % (self.url)
         print(url)
-        r = requests.post(url, data={'type':'PING'})
+        r = requests.post(url, data={'type': 'PING'})
         return r.json()
 
     def add(self, path, id):
@@ -32,7 +32,7 @@ class Server(object):
         print(url)
         with open(path, 'rb') as this_file:
             body_data = this_file.read()
-        r = requests.put(url, data=body_data, headers={'content-type':'image/jpeg'})
+        r = requests.put(url, data=body_data, headers={'content-type': 'image/jpeg'})
         return r.json()
 
     def clear(self):
@@ -52,8 +52,6 @@ class Server(object):
                 if filename.endswith('.jpg'):
                     self.add(file_path, start)
                     start += 1
-
-
 
         body_data = {"type": "WRITE", "index_path": path}
         r = requests.post(url, json=body_data)
@@ -78,6 +76,6 @@ class Server(object):
 
         with open(path, 'rb') as this_file:
             body_data = this_file.read()
-            r = requests.post(url, data=body_data, headers={'content-type':'image/jpeg'})
+            r = requests.post(url, data=body_data, headers={'content-type': 'image/jpeg'})
 
         return r.json()
