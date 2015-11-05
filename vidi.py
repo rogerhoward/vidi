@@ -12,8 +12,9 @@ class Server(object):
         image: a Pillow Image object.
         info: a dictionary providing image metadata
     """
+    
+    commands = ['add','search','ping', 'save', 'load', 'clear', 'bulk']
 
-    commands = ['add', 'search']
 
     def __init__(self, host='locahost', port=8001):
         """Return a Server object."""

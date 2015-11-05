@@ -1,6 +1,9 @@
 # Vagrant files
 .vagrant/
 
+# Flask files
+cache/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

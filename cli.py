@@ -2,8 +2,6 @@
 import requests, os, sys
 from vidi import Server
 
-command_list = ['add','search','ping', 'save', 'load', 'clear', 'bulk']
-
 if __name__ == '__main__':
     import optparse
     parser = optparse.OptionParser()
@@ -26,13 +24,14 @@ if __name__ == '__main__':
     #     print ('sorry, the path provided is not a file')
         
 
+    server = Server(host=options.host, port=options.port)
 
     if options.command is None:
         options.command = 'search'
-    elif options.command not in command_list:
+    elif options.command not in server.commands:
         print ('sorry, %s is not a supported command.' % (options.command))
-        print ('supported commands are: %s' % (', '.join(command_list)))
-        exit
+        print ('supported commands are: %s' % (', '.join(server.commands)))
+        sys.exit(0)
 
     if options.port is None:
         options.port = 8001
@@ -40,7 +39,6 @@ if __name__ == '__main__':
     if options.host is None:
         options.host = 'localhost'
 
-    server = Server(host=options.host, port=options.port)
 
     if options.command == 'ping':
         result = server.ping()
