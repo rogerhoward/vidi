@@ -1,76 +1,81 @@
 #!/usr/bin/env python
 import requests, os, sys
-command_list = ['add', 'search']
 url_base = ''
 
-
-def add(path, id):
-    url = 'http://localhost:8001/index/images/%s' % (id)
-    # files = {'file': open(path, 'rb')}
-    # r = requests.put(url, files=files)
-    # return r.json()
-
-    with open(path,'rb') as fo:
-        body_data = fo.read()
-        r = requests.put(url, data=body_data, headers={'content-type':'image/jpeg'})
-
-    return r.json()
+from config import *
 
 
-def find(path):
-    url = 'http://localhost:8001/index/searcher'
+class Server(object):
+    """A pastec server object:
 
-    with open(path,'rb') as fo:
-        body_data = fo.read()
-        r = requests.post(url, data=body_data, headers={'content-type':'image/jpeg'})
+    Attributes:
+        image: a Pillow Image object.
+        info: a dictionary providing image metadata
+    """
 
-    return r.json()
+    commands = ['add', 'search']
 
-if __name__ == '__main__':
-    import optparse
-    parser = optparse.OptionParser()
+    def __init__(self, host='locahost', port=8001):
+        """Return a Server object."""
+        self.host = host
+        self.port = port
+        self.url = 'http://%s:%s' % (self.host, self.port)
 
-    parser.add_option('-i', '--input', dest='path', help='read image from FILE', metavar="FILE")
-    parser.add_option('-d', '--id', dest='id', help='index id', type=int)
-    parser.add_option('-c', '--command', dest='command', help='command mode')
-    parser.add_option('-p', '--port', dest='port', help='port number', type=int)
-    parser.add_option('-o', '--host', dest='host', help='hostname')
+    def ping(self):
+        url = '%s/' % (self.url)
+        print(url)
+        r = requests.post(url, data={'type': 'PING'})
+        return r.json()
 
-    options, args = parser.parse_args()
+    def add(self, path, id):
+        url = '%s/index/images/%s' % (self.url, id)
+        print(url)
+        with open(path, 'rb') as this_file:
+            body_data = this_file.read()
+        r = requests.put(url, data=body_data, headers={'content-type': 'image/jpeg'})
+        return r.json()
 
-    if options.path is None:
-        print ('sorry, you must provide the -i option at minimum')
-        sys.exit(0)
-    elif os.path.exists(options.path) is False:
-        print ('sorry, the path provided does not exist')
-        sys.exit(0)
-    elif os.path.isfile(options.path) is False:
-        print ('sorry, the path provided is not a file')
-        sys.exit(0)
+    def clear(self):
+        url = '%s/index/io' % (self.url)
+        print(url)
+        body_data = {"type": "CLEAR"}
+        r = requests.post(url, json=body_data)
+        return r.json()
 
+    def bulk(self, path, start=1):
+        url = '%s/index/io' % (self.url)
+        print('url: %s' % url)
 
-    if options.command is None:
-        options.command = 'search'
-    elif options.command not in command_list:
-        print ('sorry, %s is not a supported command.' % (options.command))
-        print ('supported commands are: %s' % (', '.join(command_list)))
-        sys.exit(0)
+        for directory, directories, files in os.walk(path):
+            for filename in files:
+                file_path = os.path.join(directory, filename)
+                if filename.endswith('.jpg'):
+                    self.add(file_path, start)
+                    start += 1
 
-    if options.port is None:
-        options.port = 8000
+        body_data = {"type": "WRITE", "index_path": path}
+        r = requests.post(url, json=body_data)
+        return r.json()
 
-    if options.host is None:
-        options.host = 'localhost'
+    def save(self, path):
+        url = '%s/index/io' % (self.url)
+        print(url, path)
+        body_data = {"type": "WRITE", "index_path": path}
+        r = requests.post(url, json=body_data)
+        return r.json()
 
-    url_base = 'http://%s:%s' % (options.host, options.port)
+    def load(self, path):
+        url = '%s/index/io' % (self.url)
+        print(url, path)
+        body_data = {"type": "LOAD", "index_path": path}
+        r = requests.post(url, json=body_data)
+        return r.json()
 
-    if options.command == 'search':
-        the_result = find(options.path)
-    elif options.command == 'add':
-        if options.id is None:
-            print ('Sorry, the add command requires the -d ID parameter')
-            sys.exit(0)
-        else:
-            the_result = add(options.path, options.id)
+    def find(self, path):
+        url = '%s/index/searcher' % (self.url)
 
-    print (the_result)
+        with open(path, 'rb') as this_file:
+            body_data = this_file.read()
+            r = requests.post(url, data=body_data, headers={'content-type': 'image/jpeg'})
+
+        return r.json()
