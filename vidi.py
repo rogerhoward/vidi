@@ -5,12 +5,12 @@ url_base = ''
 
 
 def add(path, id):
-    url = 'http://localhost:8000/index/images/%s' % (id)
+    url = 'http://localhost:8001/index/images/%s' % (id)
     # files = {'file': open(path, 'rb')}
     # r = requests.put(url, files=files)
     # return r.json()
 
-    with open(path) as fo:
+    with open(path,'rb') as fo:
         body_data = fo.read()
         r = requests.put(url, data=body_data, headers={'content-type':'image/jpeg'})
 
@@ -18,9 +18,9 @@ def add(path, id):
 
 
 def find(path):
-    url = 'http://localhost:8000/index/searcher'
+    url = 'http://localhost:8001/index/searcher'
 
-    with open(path) as fo:
+    with open(path,'rb') as fo:
         body_data = fo.read()
         r = requests.post(url, data=body_data, headers={'content-type':'image/jpeg'})
 
@@ -39,22 +39,22 @@ if __name__ == '__main__':
     options, args = parser.parse_args()
 
     if options.path is None:
-        print 'sorry, you must provide the -i option at minimum'
-        exit
+        print ('sorry, you must provide the -i option at minimum')
+        sys.exit(0)
     elif os.path.exists(options.path) is False:
-        print 'sorry, the path provided does not exist'
-        exit
+        print ('sorry, the path provided does not exist')
+        sys.exit(0)
     elif os.path.isfile(options.path) is False:
-        print 'sorry, the path provided is not a file'
-        exit
+        print ('sorry, the path provided is not a file')
+        sys.exit(0)
 
 
     if options.command is None:
         options.command = 'search'
     elif options.command not in command_list:
-        print 'sorry, %s is not a supported command.' % (options.command)
-        print 'supported commands are: %s' % (', '.join(command_list))
-        exit
+        print ('sorry, %s is not a supported command.' % (options.command))
+        print ('supported commands are: %s' % (', '.join(command_list)))
+        sys.exit(0)
 
     if options.port is None:
         options.port = 8000
@@ -68,9 +68,9 @@ if __name__ == '__main__':
         the_result = find(options.path)
     elif options.command == 'add':
         if options.id is None:
-            print 'Sorry, the add command requires the -d ID parameter'
+            print ('Sorry, the add command requires the -d ID parameter')
             sys.exit(0)
         else:
             the_result = add(options.path, options.id)
 
-    # print the_result
+    print (the_result)
