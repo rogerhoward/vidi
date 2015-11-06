@@ -5,7 +5,7 @@ import StringIO, os, re, requests, urllib
 import simplejson as json
 
 from vidi import Server
-from config import *
+import config
 
 app = Flask(__name__)
 
@@ -20,7 +20,14 @@ app = Flask(__name__)
 # http://127.0.0.1:5000/g9_20090806_0143.jpg/full/600,/!90/80.jpg
 @app.route('/images/')
 def images():
-    print 'images'
+    image_list = []
+    for directory, directories, files in os.walk(config.photo_root):
+        for filename in files:
+            file_path = os.path.join(directory, filename)
+            if filename.endswith('.jpg'):
+                image_list.append(file_path)
+
+    return '<br>\n'.join(image_list)
 
 
 
@@ -37,4 +44,4 @@ if __name__ == '__main__':
     print('launching server...')
 
     app.debug = True
-    app.run(processes=3)
+    app.run(port=9000)
