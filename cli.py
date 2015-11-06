@@ -43,9 +43,7 @@ if __name__ == '__main__':
     if options.command == 'ping':
         result = server.ping()
     elif options.command == 'bulk':
-        if options.id is None:
-            options.id = 1
-        result = server.bulk(path=options.path, start=options.id)
+        result = server.bulk(path=options.path)
     elif options.command == 'save':
         result = server.save(options.path)
     elif options.command == 'load':

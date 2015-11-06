@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 import requests, os, sys
 url_base = ''
-
-from config import *
-
+from PIL import Image
+import StringIO
+# from config import *
+import config
+from db import Picture, getmd5
 
 class Server(object):
     """A pastec server object:
@@ -31,8 +33,15 @@ class Server(object):
     def add(self, path, id):
         url = '%s/index/images/%s' % (self.url, id)
         print(url)
-        with open(path, 'rb') as this_file:
-            # body_data = this_file.read()
+        file_path_md5 = getmd5(path)
+        this_image = Image.open(path)
+
+        if (this_image.width > config.max_dim) or (this_image.height > config.max_dim):
+            this_image.thumbnail((config.max_dim, config.max_dim), Image.ANTIALIAS)
+            img_io = StringIO.StringIO()
+            this_image.save(img_io, 'JPEG', quality=70)
+
+        with open(img_io) as this_file:
             r = requests.put(url, data=this_file, headers={'content-type': 'image/jpeg'})
         return r.json()
 
@@ -43,19 +52,29 @@ class Server(object):
         r = requests.post(url, json=body_data)
         return r.json()
 
-    def bulk(self, path, start=1):
+    def bulk(self, path):
         url = '%s/index/io' % (self.url)
         print('url: %s' % url)
+
+        session = config.DBSession()
 
         for directory, directories, files in os.walk(path):
             for filename in files:
                 file_path = os.path.join(directory, filename)
                 if filename.endswith('.jpg'):
-                    self.add(file_path, start)
-                    start += 1
+                    file_path_md5 = getmd5(file_path)
+                    if session.query(Picture).filter(Picture.path_md5 == file_path_md5).count() == 0:
+                        new_picture = Picture( path=file_path )
+                        session.add(new_picture)
+                        session.commit()
+                        self.add(file_path, new_picture.id)
+                    else:
+                        print('skipping, record already exists: %s' % (file_path_md5))
 
-        body_data = {"type": "WRITE", "index_path": path}
-        r = requests.post(url, json=body_data)
+        session.commit()
+
+        # body_data = {"type": "WRITE", "index_path": path}
+        # r = requests.post(url, json=body_data)
         return r.json()
 
     def save(self, path):
