@@ -35,13 +35,14 @@ class Server(object):
         print(url)
         file_path_md5 = getmd5(path)
         this_image = Image.open(path)
+        tmp_filename = '%s.%s' % (file_path_md5, 'jpg')
+        tmp_path = os.path.join(config.tmp_root, tmp_filename)
 
         if (this_image.width > config.max_dim) or (this_image.height > config.max_dim):
             this_image.thumbnail((config.max_dim, config.max_dim), Image.ANTIALIAS)
-            img_io = StringIO.StringIO()
-            this_image.save(img_io, 'JPEG', quality=70)
+            this_image.save(tmp_path, 'JPEG', quality=70)
 
-        with open(img_io) as this_file:
+        with open(tmp_path,'rb') as this_file:
             r = requests.put(url, data=this_file, headers={'content-type': 'image/jpeg'})
         return r.json()
 
@@ -75,7 +76,7 @@ class Server(object):
 
         # body_data = {"type": "WRITE", "index_path": path}
         # r = requests.post(url, json=body_data)
-        return r.json()
+        return {'status':'success'}
 
     def save(self, path):
         url = '%s/index/io' % (self.url)

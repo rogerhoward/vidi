@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from db import Base
 
-max_dim = 800
+max_dim = 600
 
 # path to the parent directory of the iiify.py application
 project_root = os.path.dirname(os.path.abspath(__file__))
