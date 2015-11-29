@@ -95,8 +95,8 @@ class Server(object):
     def find(self, path):
         url = '%s/index/searcher' % (self.url)
 
-        with open(path, 'rb') as this_file:
-            body_data = this_file.read()
-            r = requests.post(url, data=body_data, headers={'content-type': 'image/jpeg'})
+        # with open(path, 'rb') as this_file:
+        #     body_data = this_file.read()
+        #     r = requests.post(url, data=body_data, headers={'content-type': 'image/jpeg'})
 
         return r.json()
