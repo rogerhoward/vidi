@@ -1,5 +1,6 @@
 # Vagrant files
 .vagrant/
+./vagrant_data
 
 # Flask files
 cache/
