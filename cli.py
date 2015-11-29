@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import requests, os, sys
-# from vidi import Server
+from vidi import Server
 
 if __name__ == '__main__':
     import optparse

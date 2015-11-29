@@ -1,10 +1,6 @@
 # Setting up server environment
 
-# hostname
-sudo hostname pastec
-
 # Updates and installs
-
 echo "updating apt-get repositories"
 sudo apt-get update -q
 
@@ -45,7 +41,7 @@ sudo cat > /etc/init.d/pastec <<EOF
 # Description:       A pastec service
 ### END INIT INFO
 
-SCRIPT=sudo cd /home/vagrant/pastec/build/; sudo pastec -p 8000 visualWordsORB.dat &
+SCRIPT=sudo cd /home/vagrant/pastec/build/; sudo ./pastec -p 8000 visualWordsORB.dat &
 RUNAS=vagrant
 
 PIDFILE=/var/run/pastec.pid
